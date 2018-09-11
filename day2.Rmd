@@ -1,0 +1,56 @@
+---
+title: "day2"
+author: "Niklas Rindtorff"
+date: "9/6/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Given an input matrix 
+```{r}
+example_matrix <- matrix(rexp(100, rate=.5), ncol=20)
+```
+
+
+```{r, eval = FALSE}
+
+
+normalize <- function(input_matrix) {
+  t(t(input_matrix)/colSums(input_matrix) #spaces
+)
+
+normalized_matrix <- normalize(example_matrix) #curly braces, 
+
+```
+
+```{r}
+normalize <- function(input_matrix){
+require(magrittr) 
+require(dplyr)
+  
+input_matrix %>% 
+  as.data.frame() %>% 
+  mutate_all(funs(.-min(.))) %>% 
+  mutate_all(funs(./max(.))) %>%
+    return()
+}
+
+```
+
+#Final task
+
+```{r}
+# 1) only using subsetting 
+iris[iris$Sepal.Length < (mean(iris$Sepal.Length) - sd(iris$Sepal.Length)) &
+       iris$Petal.Length < mean(iris$Petal.Length) & 
+       iris$Petal.Length/iris$Petal.Width > 3,5]
+
+# 2) 
+plot(iris[iris$Sepal.Length < (mean(iris$Sepal.Length) - sd(iris$Sepal.Length)) &
+       iris$Petal.Length < mean(iris$Petal.Length),])
+  
+```
+
