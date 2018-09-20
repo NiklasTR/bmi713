@@ -1,12 +1,24 @@
 ---
 title: "BMI 713/BMIF Problem Set 1 Solution"
+author: "Niklas Rindtorff"
 date: "`r Sys.Date()`"
-author: Niklas Rindtorff
 output:
   pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
+
 # Overview:
+I load a package collection in the background. 
+
+```{r, messages = FALSE, include=FALSE}
+library(tidyverse)
+require(knitr)
+# Set so that long lines in R will be wrapped:
+opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
+```
+
 
 ## Question 1 (4 pts)
 
@@ -22,7 +34,9 @@ It may be useful to use some of R's built in help functionality.
 # ANSWER 1.2
 # The arguments of the sum function are:
 # * A vector with either numeric, logical (True/False = 1/0) or complex numbers
-# * An na.rm argument. This argument is a logical and decides if vectors with a missing value are going to produce a missing value as overall result or if NAs are dropped during summation.  
+# * An na.rm argument. This argument is a logical and decides if vectors with a 
+#missing value are going to produce a missing value as overall result or if NAs 
+#are dropped during summation.  
 ```
 
 
@@ -54,6 +68,7 @@ random_vector <- runif(50, min=0, max=50)
 sd(random_vector)
 ```
 
+\newpage
 
 ## Question 2 (12 pts)
 ### Basic R syntax
@@ -82,7 +97,8 @@ Now write a code that will:
 
 ```{r, even_odd}
 # create vector C
-c <- as.logical(vector_example%%2)
+# elegant alternative: c <- as.logical(vector_example%%2)
+c <- ifelse(vector_example%%2, 1, 0)
 
 # create Evens_example
 Evens_example <- vector_example[!c]
@@ -91,8 +107,12 @@ Evens_example <- vector_example[!c]
 Odds_example <- vector_example[c]
 
 #ANSWER 2.2
-#I calculate the modulo 2 for each number in the vector. Uneven elements have a residual of one. By using a logical transformation, I turn the residual value of 1 into a TRUE statement. This statement hence indicates an uneven number at its respective index.
-#Next I use c as an index-vector to return even and uneven numbers. To return even numbers I use the logical negating variable "!".
+#I calculate the modulo 2 for each number in the vector. 
+#Uneven elements have a residual of one. 
+#By using a logical transformation, I turn the residual value of 1 into a TRUE statement. 
+#This statement hence indicates an uneven number at its respective index.
+#Next I use c as an index-vector to return even and uneven numbers. 
+#To return even numbers I use the logical negating variable "!".
 ```
 
 
@@ -101,21 +121,29 @@ In our first lecture, we worked through of data normalization in which a random 
 
 Remember: check your logic for the normalization procedure as we corrected in the example in class.
 
-
 ```{r, normal_row}
-library(tidyverse)
+
 # Create row-wise normalization function
 normalize_row_wise <- function(input_matrix){
 require(magrittr) 
 require(dplyr)
   
-input_matrix %>% t() %>% #I use my function and insert two transpositions, here
+input_matrix %>% t() %>% 
+  #I use my function and insert two transpositions, here
   as.data.frame() %>% 
-  mutate_all(funs(.-min(.))) %>% # I subtract the minimal value from all values (thereby creating a 0 value field per column)
-  mutate_all(funs(./max(.))) %>% # Afterwards I scale all values by the maximum value, making the latter equal to 1.  
+  mutate_all(funs(.-min(.))) %>% 
+  # I subtract the minimal value from all values (thereby creating a 0 value field per column)
+  mutate_all(funs(./max(.))) %>% 
+  # Afterwards I scale all values by the maximum value, making the latter equal to 1.  
   as.matrix() %>% t() %>% #and here
     return()
 }
+
+#It was not clear to me wether we have to generate a "classic" matrix normalization 
+#or if we should scale every row between 0 and 1. English is not my first language.
+# normalize_simple <- function(input_matrix){
+#   return((input_matrix-min(input_matrix))/max(input_matrix-min(input_matrix)))
+# }
 ```
 
 
@@ -132,8 +160,10 @@ require(dplyr)
   
 output_matrix <- input_matrix %>%
   as.data.frame() %>% 
-  mutate_all(funs(.-min(.))) %>% # I subtract the minimal value from all values (thereby creating a 0 value field per column)
-  mutate_all(funs(./max(.))) %>% # Afterwards I scale all values by the maximum value, making the latter equal to 1.  
+  mutate_all(funs(.-min(.))) %>% 
+  # I subtract the minimal value from all values (thereby creating a 0 value field per column)
+  mutate_all(funs(./max(.))) %>% 
+  # Afterwards I scale all columns by their maximum value, making the latter equal to 1.
   as.matrix() %>% 
   unname() #helper to remove all names that have been introduced during conversions
 
@@ -141,8 +171,14 @@ if(!identical(input_matrix, output_matrix)){return(output_matrix)} else{return()
 }
 
 # ANSWER 2.4
-# The function is very similar to the function above with the only difference that I did not introduce a transposition twice. The output of the function is controlled by a conditional statement which depends on the result of identical(). Since identical() is very strict, I have to remove all object attributes such as name from the output matrix before comparison with unname().
-#A return statement is not necessary in R functions, as R will always return the last modified object in the function envionment. In general, a return() argument is considered good style. In my implementation it is necessary to control the output. 
+# The function is very similar to the function above with the only difference 
+#that I did not introduce a transposition twice. The output of the function is controlled 
+#by a conditional statement which depends on the result of identical(). Since identical() is 
+#very strict, I have to remove all object attributes such as name from the 
+#output matrix before comparison with unname().
+#A return statement is not necessary in R functions, as R will always 
+#return the last modified object in the function envionment. In general, a return() 
+#argument is considered good style. In my implementation it is necessary to control the output. 
 ```
 
 
@@ -176,8 +212,15 @@ c(mean(x = 1:15), x)
 
 
 # ANSWER 3a
-#Assign sets "a value to a name in an envionment" (R Documentation) This environment, however, is most of the time not specified. This leads to an assignment of the name and value pair in the general envionment, even if assign() is used in a seperate function or loop. Therefore, if you set x <- 3 in your script and you would run an unrelated third-party function afterwards that uses the name "x" and assign() to assign a value, you could not expect x==3 to be TRUE. 
-#Moreover, assign breaks the magrittr pipe operator %>% which constructs object-overwriting helper functions to proccess a pipe. 
+#Assign sets "a value to a name in an envionment" (R Documentation).
+#This environment, however, is most of the time not specified. 
+#This leads to an assignment of the name and value pair in the general envionment, 
+#even if assign() is used in a seperate function or loop. 
+#Therefore, if you set x <- 3 in your script and you would run an unrelated third-party 
+#function afterwards that uses the name "x" and assign() to assign a value, 
+#you could not expect x==3 to be TRUE. 
+#Moreover, assign breaks the magrittr pipe operator %>% which constructs 
+#object-overwriting helper functions to proccess a pipe. 
 
 # ANSWER 3b
 # Values can be assigned with <- and = 
@@ -186,6 +229,7 @@ c(mean(x = 1:15), x)
 # <- should be preferred acc. to the Google Style Guide for R 
 ```
 
+\newpage
 
 ## Question 4 (10 pts)
 ### For Loops and Apply
@@ -198,9 +242,10 @@ head(cars)
 times_elegant <- cars %>% 
   mutate(time = dist/speed)
 
-times_elegant
+head(times_elegant, 20)
 #ANSWER
-#I use the mutate() function from the dplyr package to introduce a rowwise operation to the dataframe
+#I use the mutate() function from the dplyr package to introduce 
+#a rowwise operation to the dataframe
 ```
 
 
@@ -211,7 +256,7 @@ Using a For Loop, find and report the time for each car.
 # Calculate drive time for each car using for loop
 times_loop <- c()
 for(ii in 1:nrow(cars)){
-  times[[ii]] <- cars$dist[ii]/cars$speed[ii]
+  times_loop[[ii]] <- cars$dist[ii]/cars$speed[ii]
 }
 
 # Display the drive times
@@ -229,6 +274,7 @@ times_apply <- apply(cars, 1, function(x){x[2]/x[1]})
 times_apply
 ```
 
+\newpage
 
 ## Question 5 (7 pts)
 
@@ -246,7 +292,7 @@ function_1 <- function(a,b){
 a = b <- function_1(a,b)
 ```
 
-```{r}
+```{r, eval = FALSE}
 a <- c(3,6,2,3,6,4,1,7,6,3,9)
 b <- 0.5
 function_1 <- function(a,b){
@@ -258,7 +304,10 @@ a = b <- function_1(a,b)
 identical(a,b)
 
 # ANSWER 5a
-# a and b are identical lists of 11 numeric elements, representing the initial values of a*2. The initial values in a are coerced to a list by list-apply (aka lappy), which divides the values in a by 0.5 and stores them in a list with the name "b". b then is assigned to a. 
+# a and b are identical lists of 11 numeric elements, representing the 
+#initial values of a*2. The initial values in "a" are coerced to a list by 
+#list-apply (aka lappy), which divides the values in "a" by 0.5 and stores them 
+#in a list with the name "b". "b" then is assigned to "a". 
 ```
 
 
@@ -269,9 +318,12 @@ identical(a,b)
 
 ```{r, scope}
 # ANSWER 5b.
-# It does not effect the value outside the function in general (if assign() was not used). The assigned objects outside the function are usually part of the global enviromnent while objects inside the function are located in a separate envionment. 
+# It does not effect the value outside the function in general (if assign() was not used). 
+#The assigned objects outside the function are usually part of the global enviromnent 
+#while objects inside the function are located in a separate envionment. 
 ```
 
+\newpage
 
 ## Question 6 (12 pts)
 ### Conditionals
@@ -316,33 +368,51 @@ Using *switch*, define a function that will return sepal dimensions (Length and 
 
 ```{r, switch}
 # Create function using switch
-quick_switch <- function(df, switcher){
-  switch(switcher, 
-         sepal = df %>% as.tibble %>%
-           filter(Species == "setosa") %>%
-           select(Sepal.Length, Sepal.Width) %>% 
-           as.data.frame(),
-         petal = df %>% as.tibble %>%
-           filter(Species != "setosa") %>%
-           select(Petal.Length, Petal.Width) %>% 
-           as.data.frame())
-}
+# elegant_switch <- function(df, switcher){
+#   switch(switcher, 
+#          sepal = df %>% as.tibble %>%
+#            filter(Species == "setosa") %>%
+#            select(Sepal.Length, Sepal.Width) %>% 
+#            as.data.frame(),
+#          df %>% as.tibble %>%
+#            filter(Species != "setosa") %>%
+#            select(Petal.Length, Petal.Width) %>% 
+#            as.data.frame())
+# }
 
+#Create another function using switch that needs apply to go over the df. 
 apply_switch <- function(row_var, switcher){
   
   switch (switcher,
-    sepal = if(row_var[5] == "setosa"){return(c(row_var[1], row_var[2]))},
-    petal = if(row_var[5] != "setosa"){return(c(row_var[3], row_var[4]))}
+    sepal = if(row_var[5] == "setosa"){return(c(row_var[1], row_var[2]) %>% unlist())}
+    else{return(c(NA, NA))},
+    if(row_var[5] != "setosa"){return(c(row_var[3], row_var[4]) %>% unlist())}
+    else{return(c(NA, NA))}
   )
 }
 
 # Call function using apply() and report results
+switch_result <- apply(iris, 1, apply_switch, switcher = "sepal") %>% t() %>% as.tibble() %>%
+  magrittr::set_colnames(c("my Variable 1", "my Variable 2"))
+head(switch_result)
 
+switch_result <- apply(iris, 1, apply_switch, switcher = "petal") %>% t() %>% as.tibble() %>% 
+  magrittr::set_colnames(c("my Variable 1", "my Variable 2"))
+head(switch_result)
 ```
+
+\newpage
 
 ## Question 7 (1 pt)
 ### How long did this problem set take to complete?
 Please report this number in hours.
-**2 hours**
+**4 hours**
+
+\newpage
+
+#Session Info
+```{r}
+sessionInfo()
+```
 
 
